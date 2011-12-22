@@ -6,7 +6,7 @@ Getting Started
 Just copy the files `SCSQLite.h` and `SCSQLite.m` for your project.
 Then if your project is using the ARC is going on (in Xcode 4, that's under the Sparrow target -> Build Phases -> Compile Sources) and add the `SCSQLite.m` the flag `-fno-objc-arc`
 
-In the class `SCSQLite.h` is necessary to put the name of the database in the variable `kDataBase`
+In the class `SCSQLite.h` is necessary to put the name of the database in the variable `kDatabaseName`
 
 
 
