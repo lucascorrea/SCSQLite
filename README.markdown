@@ -3,7 +3,7 @@ The SCSQLite is a wrapper of SQLite. (http://sqlite.org/)
 
 Getting Started
 =================
-Just copy the files `SCSQLite.h` and `SCSQLite.m` for your project.
+Just drag the two classes into your project. Also you need to import SQLite3 framework. Go to frameworks-> add existing framework->libsql3.dylib
 Then if your project is using the ARC is going on (in Xcode 4, that's under the Sparrow target -> Build Phases -> Compile Sources) and add the `SCSQLite.m` the flag `-fno-objc-arc`
 
 In the class `SCSQLite.h` is necessary to put the name of the database in the variable `kDatabaseName`
