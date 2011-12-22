@@ -2,7 +2,7 @@
 //  SCSQLite.m
 //
 //  Created by Lucas Correa on 21/12/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2011 Siriuscode Solutions. All rights reserved.
 //
 
 #import "SCSQLite.h"

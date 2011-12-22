@@ -2,13 +2,13 @@
 //  SCSQLite.h
 //
 //  Created by Lucas Correa on 21/12/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2011 Siriuscode Solutions. All rights reserved.
 
 
 #import <Foundation/Foundation.h>
 #import "sqlite3.h"
 
-#warning Input name file of database
+#warning Add the name of the sqlite
 #define kDatabaseName @""
 
 @interface SCSQLite : NSObject {
