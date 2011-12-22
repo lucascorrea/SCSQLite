@@ -134,20 +134,12 @@ static SCSQLite * _scsqlite = nil;
 	NSMutableString *dump = [[[NSMutableString alloc] initWithCapacity:256] autorelease];
 	
 	// info string ;) please do not remove it
-	[dump appendString:@";\n; Dump generated with SQLiteManager4iOS \n;\n; By Misato (2011)\n"];
+	[dump appendString:@";\n; Dump generated with SCSQLite \n;\n"];
 	[dump appendString:[NSString stringWithFormat:@"; database %@;\n", kDatabaseName]];
 	
 	// first get all table information
 	
 	NSArray *rows = [SCSQLite selectRowSQL:@"SELECT * FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"];
-	// last sql query returns something like:
-	// {
-	// name = users;
-	// rootpage = 2; 
-	// sql = "CREATE TABLE users (id integer primary key autoincrement, user text, password text)";
-	// "tbl_name" = users;
-	// type = table;
-	// }
 	
 	//loop through all tables
 	for (int i = 0; i<[rows count]; i++) {
