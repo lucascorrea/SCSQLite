@@ -35,7 +35,7 @@ static SCSQLite * _scsqlite = nil;
 
 + (BOOL)executeSQL:(NSString*)sql{
     
-    BOOL openDatabase;
+    BOOL openDatabase = NO;
 	
 	//Check if database is open and ready.
 	if ([SCSQLite shared]->db == nil) {
@@ -45,13 +45,35 @@ static SCSQLite * _scsqlite = nil;
 	if (openDatabase) {		
 		sqlite3_stmt *statement;	
 		const char *query = [sql UTF8String];
-		sqlite3_prepare_v2([SCSQLite shared]->db, query, -1, &statement, NULL);
-		
-		if (sqlite3_step(statement) == SQLITE_ERROR) {
+        char *errmsg;
+        
+        // prepare
+        if (sqlite3_prepare_v2([SCSQLite shared]->db, query, -1, &statement, NULL) != SQLITE_OK) {
+            NSLog(@"Error: failed to prepare statement with message '%s'.", sqlite3_errmsg([SCSQLite shared]->db));
             return NO;
-		}
-		sqlite3_finalize(statement);
-		[[SCSQLite shared] closeDatabase];
+        }
+        
+        // execute
+        while (1) {
+            if(sqlite3_exec([SCSQLite shared]->db, query, nil, &statement, &errmsg) == SQLITE_OK){
+                
+                sqlite3_finalize(statement);
+                [[SCSQLite shared] closeDatabase];
+                
+                return YES;
+            }else {
+                NSLog(@" 2. Error %d: '%s' com sql: %@", sqlite3_errcode([SCSQLite shared]->db), sqlite3_errmsg([SCSQLite shared]->db), sql);
+                if(sqlite3_errcode([SCSQLite shared]->db) != SQLITE_LOCKED){
+                    
+                    sqlite3_finalize(statement);
+                    [[SCSQLite shared] closeDatabase];
+                    
+                    return NO;
+                }
+                
+                [NSThread sleepForTimeInterval:.1];
+            }
+        }
 	}
 	else {
         return NO;
@@ -227,7 +249,7 @@ static SCSQLite * _scsqlite = nil;
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
-
+    
     if (kDatabaseName != nil) {
         databasePath = [documentsDirectory stringByAppendingPathComponent:kDatabaseName];
     }else{
