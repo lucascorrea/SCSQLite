@@ -19,11 +19,11 @@ To use the component is very easy. Import the header for your class.
 	# import "SCSQLite.h"
 
 	// To create, insert, update and delete use this method
-	BOOL success = [SCSQLite executeSQL:@"insert into Category (name) values ​​('Lucas')"];
+	BOOL success = [SCSQLite executeSQL:@"insert into User (name) values ​​('Lucas')"];
 
 
 	// To use this method select
-	NSArray *result = [SCSQLite selectRowSQL:@"select * from Category"];
+	NSArray *result = [SCSQLite selectRowSQL:@"select * from User"];
 
 
 License
@@ -31,7 +31,7 @@ License
 
 SCSQLite is licensed under the MIT License:
 
-Copyright (c) 2011 Lucas Correa (http://www.lucascorrea.com/)
+Copyright (c) 2012 Lucas Correa (http://www.lucascorrea.com/)
 
 Permission is hereby-granted, free of charge, to any person Obtaining a copy of this software and Associated documentation files (the "Software"), to deal in the Software without restriction, including without Limitation the rights to use, copy, modify, merge , publish, distribute, sublicense, and / or sell copies of the Software, and to permit persons to Whom the Software is furnished to the so, subject to the Following conditions:
 
