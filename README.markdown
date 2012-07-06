@@ -19,11 +19,11 @@ To use the component is very easy. Import the header for your class.
 	# import "SCSQLite.h"
 
 	// To create, insert, update and delete use this method
-	BOOL success = [SCSQLite executeSQL:@"insert into User (name) values ​​('Lucas')"];
+	BOOL success = [SCSQLite executeSQL:@"INSERT INTO User (name) VALUES ('Lucas')"];
 
 
 	// To use this method select
-	NSArray *result = [SCSQLite selectRowSQL:@"select * from User"];
+	NSArray *result = [SCSQLite selectRowSQL:@"SELECT * FROM User"];
 
 
 License
