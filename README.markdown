@@ -1,14 +1,9 @@
-The SCSQLite is a wrapper of SQLite. (http://sqlite.org/)
+The SCSQLite is a wrapper of SQLite in Objective-c. (http://sqlite.org/)
 
 
 Getting Started
 =================
 Just drag the two classes into your project. Also you need to import SQLite3 framework. Go to frameworks-> add existing framework->libsql3.dylib
-
-Then if your project is using the ARC is going on (in Xcode 4, that's under the Sparrow target -> Build Phases -> Compile Sources) and add the `SCSQLite.m` the flag `-fno-objc-arc`
-
-In the class `SCSQLite.h` is necessary to put the name of the database in the variable `kDatabaseName`
-
 
 
 Example Usage
@@ -17,10 +12,15 @@ Example Usage
 To use the component is very easy. Import the header for your class.
 
 	# import "SCSQLite.h"
-
+	
+	//Init database 
+	[SCSQLite initWithDatabase:@"myproject.db"];
+	
 	// To create, insert, update and delete use this method
 	BOOL success = [SCSQLite executeSQL:@"INSERT INTO User (name) VALUES ('Lucas')"];
-
+	
+	//OR Vargs va_list
+	BOOL success = [SCSQLite executeSQL:@"INSERT INTO User (name) VALUES ('%@')", @"Lucas"];
 
 	// To use this method select
 	NSArray *result = [SCSQLite selectRowSQL:@"SELECT * FROM User"];

@@ -2,27 +2,22 @@
 //  SCSQLite.h
 //
 //  Created by Lucas Correa on 21/12/11.
-//  Copyright (c) 2011 Siriuscode Solutions. All rights reserved.
+//  Copyright (c) 2012 Siriuscode Solutions. All rights reserved.
 
 
 #import <Foundation/Foundation.h>
 #import "sqlite3.h"
 
-#warning Add the name of the sqlite
-#define kDatabaseName @""
 
 @interface SCSQLite : NSObject {
-	sqlite3 *db;
+    sqlite3 *db;
 }
 
-+(SCSQLite *)shared;
-+(BOOL)executeSQL:(NSString*)sql;
-+(NSArray*)selectRowSQL:(NSString*)sql;
-+(NSString*)getDatabaseDump;
+@property (copy, nonatomic) NSString *database;
 
-
--(BOOL)openDatabase;
--(BOOL)closeDatabase;
-
++ (void)initWithDatabase:(NSString *)database;
++ (BOOL)executeSQL:(NSString *)sql, ... NS_FORMAT_FUNCTION(1,2);
++ (NSArray *)selectRowSQL:(NSString *)sql;
++ (NSString *)getDatabaseDump;
 
 @end

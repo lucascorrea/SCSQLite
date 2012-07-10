@@ -2,24 +2,33 @@
 //  SCSQLite.m
 //
 //  Created by Lucas Correa on 21/12/11.
-//  Copyright (c) 2011 Siriuscode Solutions. All rights reserved.
+//  Copyright (c) 2012 Siriuscode Solutions. All rights reserved.
 //
 
 #import "SCSQLite.h"
 
-static SCSQLite * _scsqlite = nil;
+@interface SCSQLite ()
+
+- (BOOL)openDatabase;
+- (BOOL)closeDatabase;
+
+@end
+
 
 @implementation SCSQLite
 
+@synthesize database = _database;
 
 #pragma mark -
-#pragma mark Singleton
+#pragma mark - Singleton
 
-+(SCSQLite *)shared {    
++ (SCSQLite *)shared 
+{        
+    static SCSQLite * _scsqlite = nil;
+
     @synchronized (self){
-        
+    
         static dispatch_once_t pred;
-        
         dispatch_once(&pred, ^{
             _scsqlite = [[SCSQLite alloc] init];
         });
@@ -31,12 +40,23 @@ static SCSQLite * _scsqlite = nil;
 
 
 #pragma mark -
-#pragma mark Public Methods Class 
+#pragma mark - Public Methods
 
-+ (BOOL)executeSQL:(NSString*)sql{
-    
++ (void)initWithDatabase:(NSString *)database
+{
+    [SCSQLite shared].database = database;
+}
+
++ (BOOL)executeSQL:(NSString *)sql, ...
+{    
     BOOL openDatabase = NO;
 	
+    va_list arguments;
+    va_start(arguments, sql);
+//     NSLogv(sql, arguments);
+    sql = [[NSString alloc] initWithFormat:sql arguments:arguments];
+    va_end(arguments);
+    
 	//Check if database is open and ready.
 	if ([SCSQLite shared]->db == nil) {
 		openDatabase = [[SCSQLite shared] openDatabase];
@@ -82,8 +102,9 @@ static SCSQLite * _scsqlite = nil;
 	return YES;
 }
 
-+ (NSArray*) selectRowSQL:(NSString*)sql{
-    NSMutableArray *resultsArray = [[[NSMutableArray alloc] initWithCapacity:1] autorelease];
++ (NSArray *)selectRowSQL:(NSString *)sql
+{
+    NSMutableArray *resultsArray = [[NSMutableArray alloc] initWithCapacity:1];
 	
 	if ([SCSQLite shared]->db == nil) {
 		[[SCSQLite shared] openDatabase];
@@ -96,7 +117,7 @@ static SCSQLite * _scsqlite = nil;
 	while (sqlite3_step(statement) == SQLITE_ROW) {
         
 		int columns = sqlite3_column_count(statement);
-		NSMutableDictionary *result = [[[NSMutableDictionary alloc] initWithCapacity:columns] autorelease];
+		NSMutableDictionary *result = [[NSMutableDictionary alloc] initWithCapacity:columns];
 		
         for (int i = 0; i<columns; i++) {
 			const char *name = sqlite3_column_name(statement, i);	
@@ -151,13 +172,13 @@ static SCSQLite * _scsqlite = nil;
 	return resultsArray;
 }
 
-+(NSString*)getDatabaseDump {
-	
-	NSMutableString *dump = [[[NSMutableString alloc] initWithCapacity:256] autorelease];
++ (NSString *)getDatabaseDump 
+{	
+	NSMutableString *dump = [[NSMutableString alloc] initWithCapacity:256];
 	
 	// info string ;) please do not remove it
 	[dump appendString:@";\n; Dump generated with SCSQLite \n;\n"];
-	[dump appendString:[NSString stringWithFormat:@"; database %@;\n", kDatabaseName]];
+	[dump appendString:[NSString stringWithFormat:@"; database %@;\n", [SCSQLite shared].database]];
 	
 	// first get all table information
 	
@@ -177,7 +198,7 @@ static SCSQLite * _scsqlite = nil;
 		//get all table content
 		NSArray *tableContent = [SCSQLite selectRowSQL:[NSString stringWithFormat:@"SELECT * FROM %@",tableName]];
 		
-		for (int j = 0; j<[tableContent count]; j++) {
+		for (int j = 0; j < [tableContent count]; j++) {
 			NSDictionary *item = [tableContent objectAtIndex:j];
 			
 			//keys are column names
@@ -241,25 +262,27 @@ static SCSQLite * _scsqlite = nil;
 
 
 #pragma mark - 
-#pragma mark Private Methods
+#pragma mark - Private Methods
 
--(BOOL)openDatabase {
-    
+- (BOOL)openDatabase 
+{    
     NSString *databasePath;
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     
-    if (kDatabaseName != nil) {
-        databasePath = [documentsDirectory stringByAppendingPathComponent:kDatabaseName];
+    if (self.database != nil) {
+        databasePath = [documentsDirectory stringByAppendingPathComponent:self.database];
     }else{
-        databasePath = documentsDirectory;
+        [[[UIAlertView alloc] initWithTitle:@"Alert" message:@"It is necessary to initialize the database name of the sqlite" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil] show];
+        
+        return NO;
     }
     
     //first check if exist
 	if(![[NSFileManager defaultManager] fileExistsAtPath:databasePath]) {
         // if not, move pro mainbundle root to documents
-		BOOL success = [[NSFileManager defaultManager] copyItemAtPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:kDatabaseName] toPath:databasePath error:nil];
+		BOOL success = [[NSFileManager defaultManager] copyItemAtPath:[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:self.database] toPath:databasePath error:nil];
 		if (!success) return NO;
 	}
     
@@ -271,10 +294,9 @@ static SCSQLite * _scsqlite = nil;
 }
 
 
--(BOOL)closeDatabase {
-	
+- (BOOL)closeDatabase 
+{	
 	if (db != nil) {
-		
         if (sqlite3_close(db) != SQLITE_OK){
             return NO;
         }
