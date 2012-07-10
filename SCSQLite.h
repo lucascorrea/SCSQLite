@@ -17,7 +17,7 @@
 
 + (void)initWithDatabase:(NSString *)database;
 + (BOOL)executeSQL:(NSString *)sql, ... NS_FORMAT_FUNCTION(1,2);
-+ (NSArray *)selectRowSQL:(NSString *)sql;
++ (NSArray *)selectRowSQL:(NSString *)sql, ... NS_FORMAT_FUNCTION(1,2);
 + (NSString *)getDatabaseDump;
 
 @end

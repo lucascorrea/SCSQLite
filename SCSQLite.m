@@ -25,9 +25,9 @@
 + (SCSQLite *)shared 
 {        
     static SCSQLite * _scsqlite = nil;
-
-    @synchronized (self){
     
+    @synchronized (self){
+        
         static dispatch_once_t pred;
         dispatch_once(&pred, ^{
             _scsqlite = [[SCSQLite alloc] init];
@@ -53,7 +53,7 @@
 	
     va_list arguments;
     va_start(arguments, sql);
-//     NSLogv(sql, arguments);
+ //   NSLogv(sql, arguments);
     sql = [[NSString alloc] initWithFormat:sql arguments:arguments];
     va_end(arguments);
     
@@ -102,8 +102,15 @@
 	return YES;
 }
 
-+ (NSArray *)selectRowSQL:(NSString *)sql
++ (NSArray *)selectRowSQL:(NSString *)sql, ...
 {
+    
+    va_list arguments;
+    va_start(arguments, sql);
+ //   NSLogv(sql, arguments);
+    sql = [[NSString alloc] initWithFormat:sql arguments:arguments];
+    va_end(arguments);
+    
     NSMutableArray *resultsArray = [[NSMutableArray alloc] initWithCapacity:1];
 	
 	if ([SCSQLite shared]->db == nil) {
@@ -135,7 +142,7 @@
 				}
                     
 				case SQLITE_FLOAT:{
-                    float value = sqlite3_column_int(statement, i);
+                    float value = sqlite3_column_double(statement, i);
                     [result setObject:[NSNumber numberWithFloat:value] forKey:columnName];
                     break;
 				}
@@ -146,8 +153,13 @@
                     break;
 				}
                     
-				case SQLITE_BLOB:
+				case SQLITE_BLOB:{
+                    int dataSize = sqlite3_column_bytes(statement, i);
+                    NSMutableData *data = [NSMutableData dataWithLength:dataSize];
+                    memcpy([data mutableBytes], sqlite3_column_blob(statement, i), dataSize);
+                    [result setObject:data forKey:columnName];                    
 					break;
+                }
                     
 				case SQLITE_NULL:
 					[result setObject:[NSNull null] forKey:columnName];
