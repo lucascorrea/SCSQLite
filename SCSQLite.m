@@ -190,11 +190,11 @@
 	
 	// info string ;) please do not remove it
 	[dump appendString:@";\n; Dump generated with SCSQLite \n;\n"];
-	[dump appendString:[NSString stringWithFormat:@"; database %@;\n", [SCSQLite shared].database]];
+	[dump appendString:[NSString stringWithFormat:@"; database %@;\n\n", [SCSQLite shared].database]];
 	
 	// first get all table information
 	
-	NSArray *rows = [SCSQLite selectRowSQL:@"SELECT * FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"];
+	NSArray *rows = [SCSQLite selectRowSQL:@"SELECT * FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%%';"];
 	
 	//loop through all tables
 	for (int i = 0; i<[rows count]; i++) {
@@ -208,7 +208,7 @@
 		NSString *tableName = [obj objectForKey:@"name"];
         
 		//get all table content
-		NSArray *tableContent = [SCSQLite selectRowSQL:[NSString stringWithFormat:@"SELECT * FROM %@",tableName]];
+		NSArray *tableContent = [SCSQLite selectRowSQL:@"SELECT * FROM %@",tableName];
 		
 		for (int j = 0; j < [tableContent count]; j++) {
 			NSDictionary *item = [tableContent objectAtIndex:j];
