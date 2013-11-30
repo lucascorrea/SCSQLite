@@ -22,8 +22,8 @@
 #pragma mark -
 #pragma mark - Singleton
 
-+ (SCSQLite *)shared 
-{        
++ (SCSQLite *)shared
+{
     static SCSQLite * _scsqlite = nil;
     
     @synchronized (self){
@@ -47,13 +47,14 @@
     [SCSQLite shared].database = database;
 }
 
+
 + (BOOL)executeSQL:(NSString *)sql, ...
-{    
+{
     BOOL openDatabase = NO;
 	
     va_list arguments;
     va_start(arguments, sql);
- //   NSLogv(sql, arguments);
+    //   NSLogv(sql, arguments);
     sql = [[NSString alloc] initWithFormat:sql arguments:arguments];
     va_end(arguments);
     
@@ -62,10 +63,9 @@
 		openDatabase = [[SCSQLite shared] openDatabase];
 	}
 	
-	if (openDatabase) {		
-		sqlite3_stmt *statement;	
+	if (openDatabase) {
+		sqlite3_stmt *statement;
 		const char *query = [sql UTF8String];
-        char *errmsg;
         
         // prepare
         if (sqlite3_prepare_v2([SCSQLite shared]->db, query, -1, &statement, NULL) != SQLITE_OK) {
@@ -73,9 +73,19 @@
             return NO;
         }
         
+        id obj;
+        int idx = 0;
+        int queryCount = sqlite3_bind_parameter_count(statement);
+        
+        while (idx < queryCount) {
+            obj = va_arg(arguments, id);
+            idx++;
+            [[SCSQLite shared] bindObject:obj toColumn:idx inStatement:statement];
+        }
+        
         // execute
         while (1) {
-            if(sqlite3_exec([SCSQLite shared]->db, query, nil, &statement, &errmsg) == SQLITE_OK){
+            if(sqlite3_step(statement) == SQLITE_DONE){
                 
                 sqlite3_finalize(statement);
                 [[SCSQLite shared] closeDatabase];
@@ -107,7 +117,7 @@
     
     va_list arguments;
     va_start(arguments, sql);
- //   NSLogv(sql, arguments);
+    //   NSLogv(sql, arguments);
     sql = [[NSString alloc] initWithFormat:sql arguments:arguments];
     va_end(arguments);
     
@@ -117,7 +127,7 @@
 		[[SCSQLite shared] openDatabase];
 	}
 	
-	sqlite3_stmt *statement;	
+	sqlite3_stmt *statement;
 	const char *query = [sql UTF8String];
 	sqlite3_prepare_v2([SCSQLite shared]->db, query, -1, &statement, NULL);
     
@@ -127,7 +137,7 @@
 		NSMutableDictionary *result = [[NSMutableDictionary alloc] initWithCapacity:columns];
 		
         for (int i = 0; i<columns; i++) {
-			const char *name = sqlite3_column_name(statement, i);	
+			const char *name = sqlite3_column_name(statement, i);
             
 			NSString *columnName = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
 			
@@ -157,7 +167,7 @@
                     int dataSize = sqlite3_column_bytes(statement, i);
                     NSMutableData *data = [NSMutableData dataWithLength:dataSize];
                     memcpy([data mutableBytes], sqlite3_column_blob(statement, i), dataSize);
-                    [result setObject:data forKey:columnName];                    
+                    [result setObject:data forKey:columnName];
 					break;
                 }
                     
@@ -170,12 +180,12 @@
                     [result setObject:[NSString stringWithCString:value encoding:NSUTF8StringEncoding] forKey:columnName];
                     break;
 				}
-			}	
+			}
 		}
 		
 		[resultsArray addObject:result];
         
-	} 
+	}
     
 	sqlite3_finalize(statement);
 	
@@ -184,8 +194,8 @@
 	return resultsArray;
 }
 
-+ (NSString *)getDatabaseDump 
-{	
++ (NSString *)getDatabaseDump
+{
 	NSMutableString *dump = [[NSMutableString alloc] initWithCapacity:256];
 	
 	// info string ;) please do not remove it
@@ -273,11 +283,11 @@
 
 
 
-#pragma mark - 
+#pragma mark -
 #pragma mark - Private Methods
 
-- (BOOL)openDatabase 
-{    
+- (BOOL)openDatabase
+{
     NSString *databasePath;
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -305,9 +315,60 @@
 	return success;
 }
 
+- (void)bindObject:(id)obj toColumn:(int)idx inStatement:(sqlite3_stmt*)pStmt
+{
+    if ((!obj) || ((NSNull *)obj == [NSNull null])) {
+        sqlite3_bind_null(pStmt, idx);
+    }
+    
+    // FIXME - someday check the return codes on these binds.
+    else if ([obj isKindOfClass:[NSData class]]) {
+        const void *bytes = [obj bytes];
+        if (!bytes) {
+            // it's an empty NSData object, aka [NSData data].
+            // Don't pass a NULL pointer, or sqlite will bind a SQL null instead of a blob.
+            bytes = "";
+        }
+        sqlite3_bind_blob(pStmt, idx, bytes, (int)[obj length], SQLITE_STATIC);
+    }
+    else if ([obj isKindOfClass:[NSDate class]]) {
+        sqlite3_bind_double(pStmt, idx, [obj timeIntervalSince1970]);
+    }
+    else if ([obj isKindOfClass:[NSNumber class]]) {
+        
+        if (strcmp([obj objCType], @encode(BOOL)) == 0) {
+            sqlite3_bind_int(pStmt, idx, ([obj boolValue] ? 1 : 0));
+        }
+        else if (strcmp([obj objCType], @encode(int)) == 0) {
+            sqlite3_bind_int64(pStmt, idx, [obj longValue]);
+        }
+        else if (strcmp([obj objCType], @encode(long)) == 0) {
+            sqlite3_bind_int64(pStmt, idx, [obj longValue]);
+        }
+        else if (strcmp([obj objCType], @encode(long long)) == 0) {
+            sqlite3_bind_int64(pStmt, idx, [obj longLongValue]);
+        }
+        else if (strcmp([obj objCType], @encode(unsigned long long)) == 0) {
+            sqlite3_bind_int64(pStmt, idx, (long long)[obj unsignedLongLongValue]);
+        }
+        else if (strcmp([obj objCType], @encode(float)) == 0) {
+            sqlite3_bind_double(pStmt, idx, [obj floatValue]);
+        }
+        else if (strcmp([obj objCType], @encode(double)) == 0) {
+            sqlite3_bind_double(pStmt, idx, [obj doubleValue]);
+        }
+        else {
+            sqlite3_bind_text(pStmt, idx, [[obj description] UTF8String], -1, SQLITE_STATIC);
+        }
+    }
+    else {
+        sqlite3_bind_text(pStmt, idx, [[obj description] UTF8String], -1, SQLITE_STATIC);
+    }
+}
 
-- (BOOL)closeDatabase 
-{	
+
+- (BOOL)closeDatabase
+{
 	if (db != nil) {
         if (sqlite3_close(db) != SQLITE_OK){
             return NO;

@@ -15,8 +15,9 @@
 
 @property (copy, nonatomic) NSString *database;
 
+
 + (void)initWithDatabase:(NSString *)database;
-+ (BOOL)executeSQL:(NSString *)sql, ... NS_FORMAT_FUNCTION(1,2);
++ (BOOL)executeSQL:(NSString *)sql, ...;
 + (NSArray *)selectRowSQL:(NSString *)sql, ... NS_FORMAT_FUNCTION(1,2);
 + (NSString *)getDatabaseDump;
 
