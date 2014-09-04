@@ -5,13 +5,18 @@ Getting Started
 =================
 Just drag the two classes into your project. Also you need to import SQLite3 framework. Go to frameworks-> add existing framework->libsql3.dylib
 
+or
+
+Using CocoaPods to get start, you can add following line to your Podfile:
+
+	pod 'SCSQLite'
 
 Example Usage
 =============
 
 To use the component is very easy. Import the header for your class.
 
-	# import "SCSQLite.h"
+	# import "SCSQLite.h" or #import <SCSQLite/SCSQLite.h> (cocoapods)
 	
 	//Init database 
 	[SCSQLite initWithDatabase:@"myproject.db"];
@@ -31,7 +36,7 @@ License
 
 SCSQLite is licensed under the MIT License:
 
-Copyright (c) 2013 Lucas Correa (http://www.lucascorrea.com/)
+Copyright (c) 2014 Lucas Correa (http://www.lucascorrea.com/)
 
 Permission is hereby-granted, free of charge, to any person Obtaining a copy of this software and Associated documentation files (the "Software"), to deal in the Software without restriction, including without Limitation the rights to use, copy, modify, merge , publish, distribute, sublicense, and / or sell copies of the Software, and to permit persons to Whom the Software is furnished to the so, subject to the Following conditions:
 
