@@ -31,6 +31,12 @@ To use the component is very easy. Import the header for your class.
 	NSArray *result = [SCSQLite selectRowSQL:@"SELECT * FROM User"];
 
 
+Screencast Demo
+http://www.iosdevspot.com/casts/banco-de-dados-com-scsqlite
+
+Credit 
+[Ferbass](http://www.iosdevspot.com)
+
 License
 =============
 
