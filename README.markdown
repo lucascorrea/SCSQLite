@@ -25,7 +25,7 @@ To use the component is very easy. Import the header for your class.
 	BOOL success = [SCSQLite executeSQL:@"INSERT INTO User (name, lastname) VALUES ('Lucas', 'Correa')"];
 	
 	//OR Vargs va_list
-	BOOL success = [SCSQLite executeSQL:@"INSERT INTO User (name) VALUES (?, ?)", @"Lucas", @"Correa"];
+	BOOL success = [SCSQLite executeSQL:@"INSERT INTO User (name, lastname) VALUES (?, ?)", @"Lucas", @"Correa"];
 
 	// To use this method select
 	NSArray *result = [SCSQLite selectRowSQL:@"SELECT * FROM User"];
