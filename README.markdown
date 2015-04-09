@@ -32,7 +32,7 @@ To use the component is very easy. Import the header for your class.
 
 
 Screencast Demo
-http://www.iosdevspot.com/casts/banco-de-dados-com-scsqlite
+http://www.iosdevspot.com/2013/01/22/scsqlite3.html
 
 Credit 
 [Ferbass](http://www.iosdevspot.com)
